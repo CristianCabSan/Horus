@@ -20,6 +20,7 @@
 Requisitos:  
 - Un **dispositivo que ejecute el modelo YOLOv8**.  
 - Un **broker MQTT** para comunicar las detecciones a la placa ESP32.  
+- Una **placa ESP32-Wrover** con cámara (o placa equivalente con cámara integrada).
 
 ---
 
@@ -72,7 +73,7 @@ Nota:
 3. Desde la carpeta `yolov8`, lanzar el modelo con:
 
 ```bash
-yolo detect predict model=weights/yolo.pt source=URL-stream show
+yolo detect predict model=weights/yolo.pt source=<URL-stream> show
 ```
 
 - Aparecerá una ventana de vídeo con la imagen de la cámara ESP32 y las detecciones.
