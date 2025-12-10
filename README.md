@@ -86,17 +86,6 @@ yolo detect predict model=weights/yolo.pt source=<URL-stream> show
 
     - La ESP32 activa la señal física (buzzer o LED), por defecto en el pin 33, modificable desde main.cpp.
 
-## Resultados
-
-En esta carpeta de Drive se encuentran dos videos que muestran la demo del sistema en funcionamiento. Puedes verlos [aquí](https://drive.google.com/drive/folders/1wxoww2DgPTCWcgg2zoLQW8HTGOUgGXNf?usp=drive_link).
-
-En ambos videos se muestran tres elementos principales:
-1. **Vista general:** Se observa a la persona que porta el dispositivo. (En el primer video también aparece otra persona mostrando distintos objetos). 
-2. **Vista de la ESP32:** Se visualizan las **bounding boxes** sobre los objetos cuando el sistema detecta un arma.  
-3. **Consola del modelo:** Muestra en tiempo real en la línea de comandos si se ha realizado una detección o no.
-
-**Detalles de los videos:**
-
 - **DemoHorus:** Dos personas de pie. Uno sostiene el dispositivo ESP32-CAM mientras la otra persona muestra un mando (objeto inocuo) y una pistola. El sistema detecta correctamente el arma y activa la señal física (buzzer).  
 
 - **DemoHorusMesa:** Vista desde la ESP32 sobre una mesa con varios objetos, incluyendo un arma. El sistema detecta correctamente el arma y activa la señal física (buzzer).
