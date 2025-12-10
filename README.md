@@ -90,3 +90,5 @@ yolo detect predict model=weights/yolo.pt source=<URL-stream> show
 
 - **DemoHorusMesa:** Vista desde la ESP32 sobre una mesa con varios objetos, incluyendo un arma. El sistema detecta correctamente el arma y activa la señal física (buzzer).
 
+## Disclaimer
+Este proyecto se desarrolló durante mi etapa en el grupo DeepKnowledge de la Universidad de Sevilla, como técnico de investigación. Parte del trabajo fue realizado por otros miembros del equipo, mi contribución principal consistió en la implementación del modelo en el ESP32 y conexión MQTT.
