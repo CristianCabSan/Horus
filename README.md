@@ -1,94 +1,93 @@
-# Horus – Sistema de Detección Automática de Armas
+# Horus – Automatic Weapon Detection System
 
+## Table of Contents
 
-## Tabla de Contenidos
-
-- [Descripción](#descripción)
-- [Estructura del repositorio](#estructura-del-repositorio)
-- [Configuración](#configuración)
-  - [Ajustes de la ESP32](#ajustes-de-la-esp32)
-  - [Ajustes del modelo YOLOv8](#ajustes-del-modelo-yolov8)
-- [Ejecución](#ejecución)
-- [Resultados](#resultados)
-
----
-
-## Descripción
-
-**Horus** es un sistema de detección automática de armas en vídeo utilizando un **ESP32-CAM** y un modelo **YOLOv8** de visión por computadora. El sistema realiza inferencias en tiempo real y activa una señal física (buzzer o LED) al detectar armas en la escena.  
-
-Requisitos:  
-- Un **dispositivo que ejecute el modelo YOLOv8**.  
-- Un **broker MQTT** para comunicar las detecciones a la placa ESP32.  
-- Una **placa ESP32-Wrover** con cámara (o placa equivalente con cámara integrada).
+- [Description](#description)  
+- [Repository Structure](#repository-structure)  
+- [Setup](#setup)  
+  - [ESP32 Settings](#esp32-settings)  
+  - [YOLOv8 Model Settings](#yolov8-model-settings)  
+- [Execution](#execution)  
+- [Results](#results)  
+- [Disclaimer](#disclaimer)  
 
 ---
 
-## Estructura del repositorio
+## Description
+
+**Horus** is an automatic weapon detection system in video using an **ESP32-CAM** and a **YOLOv8** computer vision model. The system performs real-time inference and triggers a physical signal (buzzer or LED) when weapons are detected in the scene.  
+
+Requirements:  
+- A **device running the YOLOv8 model**.  
+- An **MQTT broker** to communicate detections to the ESP32 board.  
+- An **ESP32-Wrover board with a camera** (or equivalent board with an integrated camera).
+
+---
+
+## Repository Structure
 
 ### 1. `esp32cam-rtsp`
 
-Basado en el [repositorio original de rzeldent](https://github.com/rzeldent/esp32cam-rtsp), este módulo contiene el código para la **placa ESP32-CAM**, que:  
-- Genera un **stream de vídeo** en tiempo real desde la cámara integrada.  
-- Integra **MQTT** para recibir notificaciones del modelo y activar la señal física (buzzer o LED).  
+Based on the [original repository by rzeldent](https://github.com/rzeldent/esp32cam-rtsp), this module contains the code for the **ESP32-CAM board**, which:  
+- Streams **real-time video** from the integrated camera.  
+- Integrates **MQTT** to receive model notifications and trigger the physical signal (buzzer or LED).  
 
 ### 2. `yolov8`
 
-Contiene el **modelo YOLOv8 de Ultralytics** entrenado para el caso de uso específico de detección de armas. Incluye:  
-- Funcionalidad **MQTT** para enviar detecciones al ESP32.  
-- Código de inferencia y visualización de **bounding boxes** sobre los objetos detectados.
+Contains the **Ultralytics YOLOv8 model** trained for the specific use case of weapon detection. Includes:  
+- **MQTT functionality** to send detections to the ESP32.  
+- Inference code and visualization of **bounding boxes** over detected objects.
 
 ---
 
-## Configuración
+## Setup
 
-### Ajustes de la ESP32
+### ESP32 Settings
 
-En `esp32cam-rtsp/include/settings.h` debes configurar la conexión Wi-Fi y el broker MQTT:
+In `esp32cam-rtsp/include/settings.h`, configure the Wi-Fi connection and MQTT broker:
 
 ```cpp
-#define WIFI_SSID "nombre-wifi"
-#define WIFI_PASSWORD "contraseña-wifi"
-#define MQTT_BROKER_IP "IP-del-broker-mqtt"
+#define WIFI_SSID "wifi-name"
+#define WIFI_PASSWORD "wifi-password"
+#define MQTT_BROKER_IP "mqtt-broker-ip"
 ```
 
-En `yolov8/ultralytics/yolo/utils/mqtt.py` debes indicar la dirección del broker MQTT:
-
+In yolov8/ultralytics/yolo/utils/mqtt.py, set the MQTT broker address:
 ```python
 def connect_client():
-    mqtt_broker = "IP-del-broker-mqtt"
+    mqtt_broker = "mqtt-broker-ip"
     client = mqtt.Client(client_id="yolo")
     client.connect(mqtt_broker, 1883)
     return client
 ```
 
-Nota:
-- Si usas un broker local, la ESP32 debe estar en la misma red Wi-Fi que el dispositivo que ejecuta el modelo.
-- Puede ser necesario desactivar el firewall o crear excepciones para permitir la comunicación.
+**Note:**  
+- If using a local broker, the ESP32 must be on the same Wi-Fi network as the device running the model.  
+- You may need to disable the firewall or create exceptions to allow communication.
 
-## Ejecución
+---
 
-1. **Subir el código a la ESP32-CAM**.  
-2. Acceder a la **IP de la placa** desde un navegador para obtener la **URL del stream** de la cámara.  
-3. Desde la carpeta `yolov8`, lanzar el modelo con:
+## Execution
+
+1. **Upload the code to the ESP32-CAM.**  
+2. Access the **board’s IP** from a browser to get the **camera stream URL**.  
+3. From the `yolov8` folder, run the model with:
 
 ```bash
-yolo detect predict model=weights/yolo.pt source=<URL-stream> show
+yolo detect predict model=weights/yolo.pt source=<stream-URL> show
 ```
 
-- Aparecerá una ventana de vídeo con la imagen de la cámara ESP32 y las detecciones.
+- A video window will appear showing the ESP32 camera feed and detections.  
 
-- Cuando el modelo detecta un arma:
+- When the model detects a weapon:  
+    - A red bounding box is drawn around the object.
+      
+    - An MQTT message is sent.
+      
+    - The ESP32 triggers the physical signal (buzzer or LED), by default on pin 33, configurable in `main.cpp`.
 
-    - Se dibuja un bounding box rojo sobre el objeto.
-
-    - Se envía un mensaje MQTT.
-
-    - La ESP32 activa la señal física (buzzer o LED), por defecto en el pin 33, modificable desde main.cpp.
-
-- **DemoHorus:** Dos personas de pie. Uno sostiene el dispositivo ESP32-CAM mientras la otra persona muestra un mando (objeto inocuo) y una pistola. El sistema detecta correctamente el arma y activa la señal física (buzzer).  
-
-- **DemoHorusMesa:** Vista desde la ESP32 sobre una mesa con varios objetos, incluyendo un arma. El sistema detecta correctamente el arma y activa la señal física (buzzer).
+---
 
 ## Disclaimer
-Este proyecto se desarrolló durante mi etapa en el grupo DeepKnowledge de la Universidad de Sevilla, como técnico de investigación. Parte del trabajo fue realizado por otros miembros del equipo, mi contribución principal consistió en la implementación del modelo en el ESP32 y conexión MQTT.
+
+This project was developed during my time at the DeepKnowledge group of the University of Sevilla as a research technician. Part of the work was performed by other team members; my main contribution was the implementation of the model on the ESP32 and the MQTT connection.
